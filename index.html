@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel da Planilha</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 15px; }
+    table { border-collapse: collapse; width: 100%; max-width: 800px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f4f4f4; }
+  </style>
+</head>
+<body>
+
+<h2>Dados da Planilha (Atualização automática)</h2>
+<table>
+  <thead>
+    <tr>
+      <th>coluna1teste</th>
+      <th>coluna2teste</th>
+      <th>coluna3teste</th>
+      <th>coluna4teste</th>
+    </tr>
+  </thead>
+  <tbody id="dados"></tbody>
+</table>
+
+<script>
+const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSYQEy_Zi7Xl7J3tFyWO7rKe-_q7k9gT3pnURWTEGEE5xbhEhNYDiz7dQYqBoW7uVg57PKy3ERY_vfv/pub?gid=0&single=true&output=csv";
+
+async function atualizar() {
+  const resposta = await fetch(url);
+  const texto = await resposta.text();
+  const linhas = texto.trim().split("\n");
+
+  let html = "";
+  linhas.slice(1).forEach(linha => {
+    const colunas = linha.split(",");
+    html += `
+      <tr>
+        <td>${colunas[0]}</td>
+        <td>${colunas[1]}</td>
+        <td>${colunas[2]}</td>
+        <td>${colunas[3]}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("dados").innerHTML = html;
+}
+
+setInterval(atualizar, 5000);
+atualizar();
+</script>
+
+</body>
+</html>
