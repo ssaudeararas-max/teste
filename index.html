@@ -19,28 +19,45 @@
     .card {
       background-color: #ffffff;
       border-left: 6px solid #0b6e4f;
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     .emenda {
-      font-size: 20px;
+      font-size: 22px;
       font-weight: bold;
       color: #084c3a;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
-    .detalhe {
-      font-size: 16px;
+    .linha {
       margin: 4px 0;
+      font-size: 15px;
     }
 
     .label {
       font-weight: bold;
       color: #0b6e4f;
     }
+
+    .valor {
+      font-weight: bold;
+      color: #1a7f5a;
+    }
+
+    .status {
+      font-weight: bold;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .status.aprovada { background-color: #d1fae5; color: #065f46; }
+    .status.em_execucao { background-color: #e0f2fe; color: #075985; }
+    .status.pendente { background-color: #fef3c7; color: #92400e; }
+    .status.cancelada { background-color: #fee2e2; color: #991b1b; }
   </style>
 </head>
 <body>
@@ -50,6 +67,13 @@
 
 <script>
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSYQEy_Zi7Xl7J3tFyWO7rKe-_q7k9gT3pnURWTEGEE5xbhEhNYDiz7dQYqBoW7uVg57PKy3ERY_vfv/pub?gid=0&single=true&output=csv";
+
+function formatarMoeda(valor) {
+  if (!valor) return "-";
+  const numero = valor.replace(/[^\d,.-]/g, "").replace(",", ".");
+  if (isNaN(numero)) return valor;
+  return Number(numero).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
 
 async function atualizar() {
   try {
@@ -65,22 +89,39 @@ async function atualizar() {
 
     linhas.slice(1).forEach(linha => {
       const colunas = linha.split(separador).map(c => c.replace(/^"|"$/g, "").trim());
+      const dados = Object.fromEntries(cabecalhos.map((h, i) => [h, colunas[i] || "-"]));
 
-      html += `<div class="card">`;
+      const statusClasse = (dados["STATUS"] || "").toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^\w]/g, "");
 
-      // Primeira coluna como destaque (Emenda)
-      html += `<div class="emenda">🧾 ${cabecalhos[0] || "Emenda"}: ${colunas[0] || "-"}</div>`;
+      html += `
+        <div class="card">
+          <div class="emenda">🧾 Emenda: ${dados["EMENDA"] || "-"}</div>
 
-      // Demais colunas como detalhes
-      for (let i = 1; i < colunas.length; i++) {
-        html += `
-          <div class="detalhe">
-            <span class="label">${cabecalhos[i] || "Campo"}:</span> ${colunas[i] || "-"}
+          <div class="linha"><span class="label">N° Proposta:</span> ${dados["N° PROPOSTA"]}</div>
+          <div class="linha"><span class="label">Destino:</span> ${dados["DESTINO"]}</div>
+          <div class="linha"><span class="label">Parlamentar:</span> ${dados["PARLAMENTAR"]}</div>
+          <div class="linha"><span class="label">Funcional:</span> ${dados["FUNCIONAL"]}</div>
+          <div class="linha"><span class="label">Conta:</span> ${dados["CONTA"]}</div>
+          <div class="linha"><span class="label">Tipo de Emenda:</span> ${dados["TIPO DE EMENDA"]}</div>
+          <div class="linha"><span class="label">Utilização:</span> ${dados["UTILIZAÇÃO"]}</div>
+          <div class="linha"><span class="label">Eixo:</span> ${dados["EIXO"]}</div>
+          <div class="linha"><span class="label">Subcategoria:</span> ${dados["SUBCATEGORIA"]}</div>
+          <div class="linha"><span class="label">Natureza de Despesa:</span> ${dados["NATUREZA DE DESPEZA"]}</div>
+          <div class="linha"><span class="label">Diligências:</span> ${dados["DILIGÊNCIAS"]}</div>
+
+          <div class="linha"><span class="label">Valor Indicado:</span> <span class="valor">${formatarMoeda(dados["VALOR INDICADO"])}</span></div>
+          <div class="linha"><span class="label">Valor Priorizado:</span> <span class="valor">${formatarMoeda(dados["VALOR PRIORIZADO"])}</span></div>
+          <div class="linha"><span class="label">Valor Utilizado:</span> <span class="valor">${formatarMoeda(dados["VALOR UTILIZADO"])}</span></div>
+          <div class="linha"><span class="label">Saldo:</span> <span class="valor">${formatarMoeda(dados["SALDO"])}</span></div>
+
+          <div class="linha">
+            <span class="label">Status:</span>
+            <span class="status ${statusClasse}">${dados["STATUS"]}</span>
           </div>
-        `;
-      }
-
-      html += `</div>`;
+        </div>
+      `;
     });
 
     document.getElementById("dados").innerHTML = html || "Nenhum dado encontrado.";
