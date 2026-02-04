@@ -4,50 +4,89 @@
   <meta charset="UTF-8">
   <title>Painel de Emendas — Saúde</title>
   <style>
-    body { font-family: Arial; background: #f1f8f6; padding: 20px; }
-    h1 { text-align: center; color: #0b6e4f; }
-    .debug { background: #fff; padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
-    .card { background: #fff; border-left: 6px solid #0b6e4f; border-radius: 8px; padding: 16px; margin-bottom: 15px; }
-    .emenda { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f8f6;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0b6e4f;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background-color: #ffffff;
+      border-left: 6px solid #0b6e4f;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .emenda {
+      font-size: 20px;
+      font-weight: bold;
+      color: #084c3a;
+      margin-bottom: 10px;
+    }
+
+    .detalhe {
+      font-size: 16px;
+      margin: 4px 0;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #0b6e4f;
+    }
   </style>
 </head>
 <body>
 
 <h1>📋 Painel de Emendas — Saúde</h1>
-<div id="debug" class="debug">Iniciando...</div>
-<div id="dados"></div>
+<div id="dados">Carregando dados...</div>
 
 <script>
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSYQEy_Zi7Xl7J3tFyWO7rKe-_q7k9gT3pnURWTEGEE5xbhEhNYDiz7dQYqBoW7uVg57PKy3ERY_vfv/pub?gid=0&single=true&output=csv";
 
 async function atualizar() {
-  const debug = document.getElementById("debug");
   try {
     const resposta = await fetch(url);
     const texto = await resposta.text();
 
-    debug.innerText = "CSV recebido:\n\n" + texto.substring(0, 500);
-
     const separador = texto.includes(";") ? ";" : ",";
     const linhas = texto.trim().split("\n");
 
+    const cabecalhos = linhas[0].split(separador).map(c => c.replace(/^"|"$/g, "").trim());
+
     let html = "";
+
     linhas.slice(1).forEach(linha => {
       const colunas = linha.split(separador).map(c => c.replace(/^"|"$/g, "").trim());
 
-      html += `
-        <div class="card">
-          <div class="emenda">🧾 Emenda: ${colunas[0] || "-"}</div>
-          <div>Coluna 2: ${colunas[1] || "-"}</div>
-          <div>Coluna 3: ${colunas[2] || "-"}</div>
-          <div>Coluna 4: ${colunas[3] || "-"}</div>
-        </div>
-      `;
+      html += `<div class="card">`;
+
+      // Primeira coluna como destaque (Emenda)
+      html += `<div class="emenda">🧾 ${cabecalhos[0] || "Emenda"}: ${colunas[0] || "-"}</div>`;
+
+      // Demais colunas como detalhes
+      for (let i = 1; i < colunas.length; i++) {
+        html += `
+          <div class="detalhe">
+            <span class="label">${cabecalhos[i] || "Campo"}:</span> ${colunas[i] || "-"}
+          </div>
+        `;
+      }
+
+      html += `</div>`;
     });
 
     document.getElementById("dados").innerHTML = html || "Nenhum dado encontrado.";
   } catch (erro) {
-    debug.innerText = "Erro ao buscar dados: " + erro;
+    document.getElementById("dados").innerHTML = "Erro ao carregar dados.";
+    console.error(erro);
   }
 }
 
