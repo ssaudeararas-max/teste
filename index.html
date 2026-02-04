@@ -2,29 +2,52 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Painel da Planilha</title>
+  <title>Painel de Saúde</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h2 { margin-bottom: 15px; }
-    table { border-collapse: collapse; width: 100%; max-width: 800px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f4f4f4; }
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f1f8f6;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #0b6e4f;
+      margin-bottom: 30px;
+    }
+
+    .card {
+      background-color: #ffffff;
+      border-left: 6px solid #0b6e4f;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .emenda {
+      font-size: 20px;
+      font-weight: bold;
+      color: #084c3a;
+      margin-bottom: 10px;
+    }
+
+    .detalhe {
+      font-size: 16px;
+      margin: 4px 0;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #0b6e4f;
+    }
   </style>
 </head>
 <body>
 
-<h2>Dados da Planilha (Atualização automática)</h2>
-<table>
-  <thead>
-    <tr>
-      <th>coluna1teste</th>
-      <th>coluna2teste</th>
-      <th>coluna3teste</th>
-      <th>coluna4teste</th>
-    </tr>
-  </thead>
-  <tbody id="dados"></tbody>
-</table>
+<h1>📋 Painel de Emendas — Saúde</h1>
+
+<div id="dados"></div>
 
 <script>
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSYQEy_Zi7Xl7J3tFyWO7rKe-_q7k9gT3pnURWTEGEE5xbhEhNYDiz7dQYqBoW7uVg57PKy3ERY_vfv/pub?gid=0&single=true&output=csv";
@@ -32,27 +55,4 @@ const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSYQEy_Zi7Xl7J3tFyW
 async function atualizar() {
   const resposta = await fetch(url);
   const texto = await resposta.text();
-  const linhas = texto.trim().split("\n");
-
-  let html = "";
-  linhas.slice(1).forEach(linha => {
-    const colunas = linha.split(",");
-    html += `
-      <tr>
-        <td>${colunas[0]}</td>
-        <td>${colunas[1]}</td>
-        <td>${colunas[2]}</td>
-        <td>${colunas[3]}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("dados").innerHTML = html;
-}
-
-setInterval(atualizar, 5000);
-atualizar();
-</script>
-
-</body>
-</html>
+  const linhas = texto.trim(
